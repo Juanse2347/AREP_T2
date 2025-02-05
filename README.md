@@ -93,7 +93,7 @@ mvn checkstyle:check
 Vamos a comprobar los endpoints de nuestra API
 
 ```bash
-curl -X GET "http://localhost:30000/app/hello?name=Sebas"
+curl -X GET "http://localhost:30000/app/hello?name=Juan"
 ```
 
 Esperamos lo siguiente:
