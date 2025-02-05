@@ -23,14 +23,15 @@ staticfiles("webroot/public");
 ```
 
 ## 🛠️ Requisitos
-- **Java 11 o superior**
-- **Git**
+- Java 11 o superior
+- Git
+- Maven
 
 ## 🚀 Instalación y Ejecución
 ### 1️⃣ Clonar el repositorio
 ```bash
-git clone https://github.com/Juanse2347/AREP_T1
-cd AREP_T1
+git clone https://github.com/Juanse2347/AREP_T2
+cd AREP_T2
 ```
 
 ### 2️⃣ Compilar el proyecto con Maven
@@ -38,23 +39,23 @@ cd AREP_T1
 mvn clean install
 ```
 
-![Image](https://github.com/user-attachments/assets/7c0ff0fd-1c54-48ba-8dff-be8ea9682f7b)
+![Image](https://github.com/user-attachments/assets/8889b4a2-c7a5-41ee-822c-e244bc836c8c)
 
 
 ### 3️⃣ Ejecutar el servidor
+
 ```bash
-mvn exec:java -Dexec.mainClass="co.edu.eci.arep.HttpServer"
+mvn exec:java -Dexec.mainClass="co.edu.eci.arep.RunApp"
 ```
 
-![Image](https://github.com/user-attachments/assets/18d51442-87b0-44c4-93b2-b85a90dd0a7e)
+![Image](https://github.com/user-attachments/assets/69edaaf2-b097-46dc-af5d-a1c79357ea26)
 
 
 ### 4️⃣ Probar con un navegador o `curl`
 ```bash
-curl http://localhost:35000/
+curl http://localhost:30000/
 ```
 
-![Image](https://github.com/user-attachments/assets/1cfe8477-8de1-4dd7-961c-7f2fd3057542)
 
 
 ## 🔍 Pruebas
@@ -92,22 +93,23 @@ mvn checkstyle:check
 Vamos a comprobar los endpoints de nuestra API
 
 ```bash
-curl -X GET "http://localhost:35000/app/hello?name=Sebas"
+curl -X GET "http://localhost:30000/app/hello?name=Sebas"
 ```
 
 Esperamos lo siguiente:
 
-![Image](https://github.com/user-attachments/assets/d39a131a-0c46-4156-8599-95d7d5fb59f5)
+![image](https://github.com/user-attachments/assets/844ca709-f339-4f10-b446-84b7488be9e3)
 
-Vamos a registrar un usuarion
+
+Prueba el endpoint que devuelve PI
 
 ```bash
-curl -X POST -d "name=Sebas" http://localhost:35000/app/hello
+curl -X GET "http://localhost:30000/App/pi"
 ```
 
 Esperamos lo siguiente:
 
-![Image](https://github.com/user-attachments/assets/ccf6b67a-9e74-49e2-87aa-fb6dc66b472e)
+![Image](https://github.com/user-attachments/assets/19025246-5536-489e-8780-92d8b1bfa35b)
 
 
 ## 🔍 Pruebas automatizadas ##
@@ -124,7 +126,7 @@ javac -cp .:/path/to/junit-4.12.jar co/edu/eci/arep/HttpServerTest.java
 Vamos a ejecutar el servidor como un proceso en segundo plano o configurar un servicio systemd, de la siguiente manera:
 
 ```bash
-mvn exec:java -Dexec.mainClass="co.edu.eci.arep.HttpSever"
+mvn exec:java -Dexec.mainClass="co.edu.eci.arep.RunApp"
 ```
 
 ## :cd: Construido con ## 
