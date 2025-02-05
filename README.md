@@ -49,7 +49,8 @@ Puedes ejecutar pruebas con JUnit:
 mvn test
 ```
 
-![Image](https://github.com/user-attachments/assets/5a05d04f-05c6-48f2-9a22-636fec2176d1)
+![Image](https://github.com/user-attachments/assets/7ce93cf9-492c-4fda-985d-ce4f0053471f)
+
 
 ## 🔍 Pruebas de extremo a extremo ##
 
