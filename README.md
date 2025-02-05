@@ -59,7 +59,7 @@ Pruebas del navegador
 Probamos que nuestro servicio este funcionando correctamente
 
 ```bash
-http://localhost:35000/
+http://localhost:30000/
 ```
 
 ## 🔍 Pruebas de Estilo de Codificacion ##
