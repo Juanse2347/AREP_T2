@@ -1,11 +1,26 @@
-# Servidor Web Distribuido en Java
+# Microframework Web para Servicios REST y Gestión de Archivos Estáticos
 
-En este taller vamos a explorar la arquitectura de las aplicaciones distribuidas. Concretamente, exploraremos la arquitectura de  los servidores web y el protocolo http sobre el que están soportados.
+En este tallertiene como objetivo mejorar un servidor web existente que actualmente admite archivos estáticos como HTML, JavaScript, CSS e imágenes. La mejora transformará el servidor en un microframework web completamente funcional, permitiendo el desarrollo de aplicaciones web con servicios REST de backend.
+
 
 ## 📌 Características
-- Uso de **Sockets** en Java para la comunicación cliente-servidor.
-- Soporte para **HTTP GET** y **HTTP POST**.
-- Registro de logs de solicitudes.
+- Implementación del método get() que permite definir servicios REST utilizando funciones lambda.
+
+```bash
+get("/hello", (req, res) -> "hello world!");
+```
+
+- Desarrollo de un mecanismo para extraer valores de consulta de las solicitudes entrantes.
+  
+```bash
+get("/hello", (req, res) -> "hello " + req.getValues("name"));
+```
+ 
+- Implementación del método staticfiles() para definir la carpeta donde se encuentran los archivos estáticos.
+  
+```bash
+staticfiles("webroot/public");
+```
 
 ## 🛠️ Requisitos
 - **Java 11 o superior**
