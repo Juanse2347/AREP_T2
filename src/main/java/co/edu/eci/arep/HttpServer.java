@@ -1,133 +1,122 @@
 package co.edu.eci.arep;
 
-import java.net.*;
 import java.io.*;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.*;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class HttpServer {
-    private static List<String> users = new ArrayList<>(); // Lista de usuarios
+    private static Map<String, BiFunction<HttpRequest, HttpResponse, String>> getEndpoints = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        ServerSocket serverSocket = new ServerSocket(35000);
-        System.out.println("Listo para recibir....");
+    private static String staticFolder = "";
+
+
+    public static void staticfiles(String folder) {
+        staticFolder = folder;
+        System.out.println("Directorio de archivos estáticos configurado: " + staticFolder);
+    }
+
+    public static void get(String route, BiFunction<HttpRequest, HttpResponse, String> handler) {
+        String fullRoute = "/App" + route;
+        getEndpoints.put(fullRoute, handler);
+        System.out.println("Servicio GET registrado en: " + fullRoute);
+    }
+
+
+    public static void start(String[] args) throws IOException, URISyntaxException {
+        int port = 30000;
+        ServerSocket serverSocket = new ServerSocket(port);
+        System.out.println("Servidor iniciado en el puerto " + port + "...");
 
         while (true) {
             Socket clientSocket = serverSocket.accept();
-            new Thread(() -> handleClient(clientSocket)).start(); // Manejo concurrente de clientes
+            new Thread(() -> handleClient(clientSocket)).start();
         }
     }
 
+    // Maneja cada conexión de cliente.
     private static void handleClient(Socket clientSocket) {
         try (
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                OutputStream dataOut = clientSocket.getOutputStream();
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
         ) {
-            String inputLine;
-            String method = "";
-            String file = "";
-            int contentLength = 0;
-
-            while ((inputLine = in.readLine()) != null && !inputLine.isEmpty()) {
-                System.out.println("Received: " + inputLine);
-
-                if (inputLine.startsWith("GET") || inputLine.startsWith("POST")) {
-                    String[] requestParts = inputLine.split(" ");
-                    method = requestParts[0];
-                    file = requestParts[1];
-                }
-                if (inputLine.toLowerCase().startsWith("content-length:")) {
-                    contentLength = Integer.parseInt(inputLine.split(":")[1].trim());
-                }
+            String requestLine = in.readLine();
+            if (requestLine == null) {
+                clientSocket.close();
+                return;
             }
+            System.out.println("Recibido: " + requestLine);
+            String[] tokens = requestLine.split(" ");
+            String method = tokens[0];
+            String resource = tokens[1];
 
-            URI resourceUri = new URI(file);
-            System.out.println("URI: " + resourceUri);
+            URI uri = new URI(resource);
+            String path = uri.getPath();
+            String query = uri.getQuery();
 
-            if (method.equals("GET") && resourceUri.getPath().startsWith("/app/hello")) {
-                String outputLine = helloRestService(resourceUri.getQuery());
-                sendResponse(out, dataOut, outputLine);
-            } else if (method.equals("POST") && resourceUri.getPath().startsWith("/app/hello")) {
-                StringBuilder requestBody = new StringBuilder();
-                for (int i = 0; i < contentLength; i++) {
-                    requestBody.append((char) in.read());
+            if (path.startsWith("/App")) {
+                HttpRequest req = new HttpRequest(path, query);
+                HttpResponse resp = new HttpResponse();
+                BiFunction<HttpRequest, HttpResponse, String> handler = getEndpoints.get(path);
+                String response;
+                if (handler != null) {
+                    String body = handler.apply(req, resp);
+                    response = "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: application/json\r\n" +
+                            "\r\n" +
+                            "{\"response\":\"" + body + "\"}";
+                } else {
+                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
                 }
-
-                System.out.println("POST Body: " + requestBody);
-                String outputLine = postRestService(requestBody.toString());
-                sendResponse(out, dataOut, outputLine);
+                out.println(response);
             } else {
-                serveStaticFile(resourceUri.getPath(), out, dataOut);
+                serveStaticFile(path, out);
             }
-
             clientSocket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    static String helloRestService(String query) {
-        System.out.println("Query: " + query);
-        String name = query != null && query.contains("name=") ? query.split("=")[1] : "Unknown";
-        String message = users.contains(name) ? "Hola, " + name + ". ¡Bienvenido al Servidor Web!" : "El usuario " + name + " no está registrado.";
-        return jsonResponse(message);
-    }
-
-    static String postRestService(String body) {
-        System.out.println("POST Body: " + body);
-        String name = body.contains("name=") ? body.split("=")[1] : "Unknown";
-        if (!users.contains(name)) {
-            users.add(name);
+    private static void serveStaticFile(String path, PrintWriter out) {
+        if (staticFolder == null || staticFolder.isEmpty()) {
+            out.println("HTTP/1.1 404 Not Found\r\n\r\n");
+            return;
         }
-        return jsonResponse("Usuario " + name + " ha sido registrado correctamente.");
-    }
-
-    private static void serveStaticFile(String path, PrintWriter out, OutputStream dataOut) throws IOException {
         if (path.equals("/")) {
             path = "/index.html";
         }
-
-        File file = new File("Web" + path);
+        File file = new File("target/classes" + staticFolder + path);
         if (file.exists() && !file.isDirectory()) {
-            String contentType = Files.probeContentType(file.toPath());
-            byte[] fileData = Files.readAllBytes(file.toPath());
-
-            out.println("HTTP/1.1 200 OK");
-            out.println("Content-Type: " + contentType);
-            out.println("Content-Length: " + fileData.length);
-            out.println();
-            out.flush();
-
-            dataOut.write(fileData, 0, fileData.length);
-            dataOut.flush();
+            try {
+                byte[] fileData = Files.readAllBytes(file.toPath());
+                String contentType = Files.probeContentType(file.toPath());
+                String header = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: " + contentType + "\r\n" +
+                        "Content-Length: " + fileData.length + "\r\n" +
+                        "\r\n";
+                out.print(header);
+                out.flush();
+                OutputStream dataOut = new BufferedOutputStream(new DataOutputStream(new SocketOutputStreamWrapper(out)));
+                dataOut.write(fileData, 0, fileData.length);
+                dataOut.flush();
+            } catch (IOException e) {
+                out.println("HTTP/1.1 500 Internal Server Error\r\n\r\n");
+            }
         } else {
-            send404(out);
+            out.println("HTTP/1.1 404 Not Found\r\n\r\n");
         }
     }
 
-    private static void send404(PrintWriter out) {
-        String response = "HTTP/1.1 404 Not Found\r\n"
-                + "Content-Type: text/html\r\n"
-                + "\r\n"
-                + "<html><body><h1>404 Not Found</h1></body></html>";
-        out.println(response);
-        out.flush();
-    }
-
-    private static void sendResponse(PrintWriter out, OutputStream dataOut, String response) throws IOException {
-        out.println(response);
-        out.flush();
-        dataOut.flush();
-    }
-
-    private static String jsonResponse(String message) {
-        String jsonResponse = "{\"message\":\"" + message + "\"}";
-        return "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: application/json\r\n"
-                + "Content-Length: " + jsonResponse.length() + "\r\n"
-                + "\r\n"
-                + jsonResponse;
+    private static class SocketOutputStreamWrapper extends OutputStream {
+        private final PrintWriter out;
+        public SocketOutputStreamWrapper(PrintWriter out) {
+            this.out = out;
+        }
+        @Override
+        public void write(int b) throws IOException {
+            out.write(b);
+        }
     }
 }
