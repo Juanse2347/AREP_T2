@@ -126,7 +126,7 @@ javac -cp .:/path/to/junit-4.12.jar co/edu/eci/arep/HttpServerTest.java
 Vamos a ejecutar el servidor como un proceso en segundo plano o configurar un servicio systemd, de la siguiente manera:
 
 ```bash
-mvn exec:java -Dexec.mainClass="co.edu.eci.arep.RunApp"
+mvn exec:java -Dexec.mainClass="co.edu.eci.arep.HttpServer"
 ```
 
 ## :cd: Construido con ## 
