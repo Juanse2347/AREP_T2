@@ -45,17 +45,16 @@ mvn clean install
 ### 3️⃣ Ejecutar el servidor
 
 ```bash
-mvn exec:java -Dexec.mainClass="co.edu.eci.arep.RunApp"
+mvn exec:java -Dexec.mainClass="co.edu.eci.arep.HttpServer"
 ```
 
-![Image](https://github.com/user-attachments/assets/69edaaf2-b097-46dc-af5d-a1c79357ea26)
+![Image](https://github.com/user-attachments/assets/a6d5fd2b-44be-4b34-aa93-7ebdc22d51e7)
 
 
 ### 4️⃣ Probar con un navegador o `curl`
 ```bash
 curl http://localhost:30000/
 ```
-
 
 
 ## 🔍 Pruebas
