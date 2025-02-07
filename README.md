@@ -93,12 +93,12 @@ mvn checkstyle:check
 Vamos a comprobar los endpoints de nuestra API
 
 ```bash
-curl -X GET "http://localhost:30000/app/hello?name=Juan"
+curl -X GET "http://localhost:30000/app/hello?name=Pedro"
 ```
 
 Esperamos lo siguiente:
 
-![image](https://github.com/user-attachments/assets/844ca709-f339-4f10-b446-84b7488be9e3)
+![Image](https://github.com/user-attachments/assets/96425314-2516-4504-990e-2b6f79aaee43)
 
 
 Prueba el endpoint que devuelve PI
@@ -109,7 +109,7 @@ curl -X GET "http://localhost:30000/App/pi"
 
 Esperamos lo siguiente:
 
-![Image](https://github.com/user-attachments/assets/19025246-5536-489e-8780-92d8b1bfa35b)
+![Image](https://github.com/user-attachments/assets/8ab36e03-77ca-4ce0-8ca5-f239d78d37fb)
 
 
 ## 🔍 Pruebas automatizadas ##
